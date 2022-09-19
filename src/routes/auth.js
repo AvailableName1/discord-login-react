@@ -8,19 +8,18 @@ router.get(
   "/redirect",
   passport.authenticate("discord", {
     failureRedirect: "/forbidden",
-    successRedirect: "/home",
+    successRedirect: "/userInfo",
   }),
   (req, res) => {
     res.send(200);
   }
 );
 
-router.get('/logout', (req, res) => {
-  if(req.user) {
-    req.logout();
-    res.redirect('../login');
-  }
-});
-
+// router.get("/logout", (req, res) => {
+//   if (req.user) {
+//     req.logout();
+//     res.redirect("../login");
+//   }
+// });
 
 module.exports = router;

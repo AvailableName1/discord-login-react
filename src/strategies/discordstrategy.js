@@ -23,7 +23,7 @@ passport.use(
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
       callbackURL: process.env.CLIENT_REDIRECT,
-      scope: ["identify", "guilds"],
+      scope: ["identify"],
     },
     async (accessToken, refreshToken, profile, done) => {
       //to show list of servers and info about user
@@ -39,7 +39,7 @@ passport.use(
             discordId: profile.id,
             username: profile.username,
             discriminator: profile.discriminator,
-            avatar: profile.avatar
+            avatar: profile.avatar,
           });
           const savedUser = await newUser.save();
           done(null, savedUser);

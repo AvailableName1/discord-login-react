@@ -10,20 +10,20 @@ function isAuthorized(req, res, next) {
     next();
   } else {
     signale.info("User is not logged in");
-    return res.redirect("../login");
+    return res.redirect("../auth");
   }
 }
 
 router.get("/", isAuthorized, async (req, res) => {
   //get data from databse
-    try {
-      //findUser is a custom made function from Database.js
-      let data = await database.findUser(req.user.discordId);
-      res.json(data);
-      res.send(data);
-    } catch(error) {
-      console.log("");
-    }
+  try {
+    //findUser is a custom made function from Database.js
+    let data = await database.findUser(req.user.discordId);
+    res.json(data);
+    res.send(data);
+  } catch (error) {
+    console.log("");
+  }
 });
 
 module.exports = router;
