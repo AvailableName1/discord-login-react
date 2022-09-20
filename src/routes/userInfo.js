@@ -1,8 +1,9 @@
 const path = require("path");
 const signale = require("signale");
 const router = require("express").Router();
-const Database = require("../classes/Database");
-const database = new Database(process.env.MONGO_LOCAL_CONN_URL);
+
+const PrismaClient = require("@prisma/client").PrismaClient;
+const prisma = new PrismaClient();
 
 function isAuthorized(req, res, next) {
   if (req.user) {
@@ -18,7 +19,9 @@ router.get("/", isAuthorized, async (req, res) => {
   //get data from databse
   try {
     //findUser is a custom made function from Database.js
-    let data = await database.findUser(req.user.discordId);
+    let data = await prisma.user.findUnique({
+      where: { address: address },
+    });
     res.json(data);
     res.send(data);
   } catch (error) {

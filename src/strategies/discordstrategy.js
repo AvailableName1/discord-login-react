@@ -1,8 +1,10 @@
 require("dotenv").config();
 const DiscordStrategy = require("passport-discord").Strategy;
 const passport = require("passport");
-const DiscordUser = require("../models/DiscordUser");
 const signale = require("signale");
+
+const PrismaClient = require("@prisma/client").PrismaClient;
+const prisma = new PrismaClient();
 
 passport.serializeUser((user, done) => {
   signale.info("serializing user");
@@ -25,24 +27,30 @@ passport.use(
       callbackURL: process.env.CLIENT_REDIRECT,
       scope: ["identify"],
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (accessToken, refreshToken, params, profile, done) => {
       //to show list of servers and info about user
-      // signale.info(profile)
+      signale.info(profile);
+      signale.info(params);
+      console.log(params);
+      console.log(profile);
       try {
-        const user = await DiscordUser.findOne({ discordId: profile.id });
+        const user = await prisma.user.findUnique({
+          where: { discordHandle: profile.username },
+        });
         if (user) {
           signale.info("User exists");
+          const updatedUser = await prisma.user.update({
+            where: { address },
+            data: {
+              discordHandle: `${profile.username}#${profile.discriminator}`,
+            },
+          });
           done(null, user);
         } else {
           signale.info("User does not exist");
-          const newUser = await DiscordUser.create({
-            discordId: profile.id,
-            username: profile.username,
-            discriminator: profile.discriminator,
-            avatar: profile.avatar,
-          });
-          const savedUser = await newUser.save();
-          done(null, savedUser);
+          const newUser = await prisma.user.create("sdf"); //fix
+          // const savedUser = await newUser.save();
+          done(null, newUser);
         }
       } catch (err) {
         signale.error(err);
@@ -51,3 +59,9 @@ passport.use(
     }
   )
 );
+
+// model User {
+//   address       String  @id
+//   twitterHandle String?
+//   discordHandle String?
+// }

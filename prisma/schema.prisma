@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model AllowedAction {
+  id          String @id
+  description String
+  campaignId  String
+  type        String @default("referrer")
+}
+
+model Campaign {
+  id           String @id
+  protocolName String
+  slug         String
+
+  @@unique([protocolName, slug])
+}
+
+model CompletedAction {
+  id              String   @id
+  allowedActionId String
+  timestamp       DateTime @default(now())
+  userAddress     String
+  txId            String?  @unique
+  weight          Int?
+}
+
+model Payout {
+  id                String    @id
+  status            String
+  creation          DateTime  @default(now())
+  expiration        DateTime?
+  userAddress       String
+  campaignId        String
+  completedActionId String?   @unique
+  txId              String?   @unique
+}
+
+model PayoutToken {
+  id        String   @id
+  payoutId  String
+  tokenId   String
+  amountUSD Decimal?
+  amountNum String?
+}
+
+model Protocol {
+  id             String @id
+  name           String @unique
+  logo           String
+  primaryColor   String
+  secondaryColor String
+  social         String
+  emoji          String
+  baseUrl        String
+}
+
+model Referee {
+  id              String   @id
+  address         String
+  referrerAddress String
+  campaignId      String
+  timestamp       DateTime @default(now())
+
+  @@unique([address, campaignId, referrerAddress])
+}
+
+model Referrer {
+  address String @id
+}
+
+model Token {
+  id       String  @id
+  symbol   String
+  name     String
+  address  String? @default("")
+  decimals Int?
+  chainId  Int?
+
+  @@unique([chainId, address, name])
+}
+
+model Tx {
+  id      String @id
+  chainId Int
+  txHash  String
+
+  @@unique([chainId, txHash])
+}
+
+model User {
+  address       String  @id
+  twitterHandle String?
+  discordHandle String?
+}
+
+model CompletedActionToTx {
+  A String
+  B String
+
+  @@unique([A, B], map: "_CompletedActionToTx_AB_unique")
+  @@index([B], map: "_CompletedActionToTx_B_index")
+  @@map("_CompletedActionToTx")
+}
+
+model PayoutToTx {
+  A String
+  B String
+
+  @@unique([A, B], map: "_PayoutToTx_AB_unique")
+  @@index([B], map: "_PayoutToTx_B_index")
+  @@map("_PayoutToTx")
+}
