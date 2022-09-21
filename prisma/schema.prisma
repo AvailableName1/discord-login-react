@@ -10,8 +10,10 @@ datasource db {
 model AllowedAction {
   id          String @id
   description String
-  campaignId  String
   type        String @default("referrer")
+  campaignId  String
+
+  @@unique([campaignId, description])
 }
 
 model Campaign {
@@ -24,30 +26,12 @@ model Campaign {
 
 model CompletedAction {
   id              String   @id
-  allowedActionId String
-  timestamp       DateTime @default(now())
+  weight          Int?     @default(0)
   userAddress     String
-  txId            String?  @unique
-  weight          Int?
-}
+  timestamp       DateTime @default(now())
+  allowedActionId String
 
-model Payout {
-  id                String    @id
-  status            String
-  creation          DateTime  @default(now())
-  expiration        DateTime?
-  userAddress       String
-  campaignId        String
-  completedActionId String?   @unique
-  txId              String?   @unique
-}
-
-model PayoutToken {
-  id        String   @id
-  payoutId  String
-  tokenId   String
-  amountUSD Decimal?
-  amountNum String?
+  @@unique([userAddress, allowedActionId])
 }
 
 model Protocol {
@@ -109,11 +93,20 @@ model CompletedActionToTx {
   @@map("_CompletedActionToTx")
 }
 
-model PayoutToTx {
-  A String
-  B String
+model Reward {
+  id                String    @id
+  status            String
+  creation          DateTime  @default(now())
+  expiration        DateTime?
+  userAddress       String
+  campaignId        String
+  completedActionId String?   @unique
+}
 
-  @@unique([A, B], map: "_PayoutToTx_AB_unique")
-  @@index([B], map: "_PayoutToTx_B_index")
-  @@map("_PayoutToTx")
+model RewardToken {
+  id        String   @id
+  payoutId  String
+  tokenId   String
+  amountUSD Decimal?
+  amountNum String?
 }
