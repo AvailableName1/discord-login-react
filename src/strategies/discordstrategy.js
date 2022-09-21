@@ -8,14 +8,18 @@ const prisma = new PrismaClient();
 
 passport.serializeUser((user, done) => {
   signale.info("serializing user");
-  done(null, user.id);
+  done(null, user.address);
 });
 
-passport.deserializeUser(async (id, done) => {
+passport.deserializeUser(async (address, done) => {
   signale.info("deserializing user");
-  const user = await DiscordUser.findById(id);
+  const user = await prisma.user.findUnique({
+    where: {
+      address: address,
+    },
+  });
   if (user) {
-    done(null, user);
+    done(null, user.address);
   }
 });
 
@@ -34,10 +38,10 @@ passport.use(
       console.log(params);
       console.log(profile);
       try {
-        const user = await prisma.user.findUnique({
-          where: { discordHandle: profile.username },
-        });
-        if (user) {
+        // const user = await prisma.user.findUnique({
+        //   where: { discordHandle: profile.username },
+        // });
+        if (false && user) {
           signale.info("User exists");
           const updatedUser = await prisma.user.update({
             where: { address },
@@ -48,7 +52,12 @@ passport.use(
           done(null, user);
         } else {
           signale.info("User does not exist");
-          const newUser = await prisma.user.create("sdf"); //fix
+          const newUser = await prisma.user.findFirst({
+            where: {
+              address:
+                "0x397A7EC90bb4f0e89Ffd2Fb3269a3ef295d4f84A".toLowerCase(),
+            },
+          }); //fix
           // const savedUser = await newUser.save();
           done(null, newUser);
         }
